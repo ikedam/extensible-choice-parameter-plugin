@@ -119,6 +119,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
     {
         private List<String> choiceList = null;
         private String defaultChoice = null;
+        public String editedValue = null;
+        
         public MockChoiceListProvider(List<String> choiceList, String defaultChoice){
             this.choiceList = choiceList;
             this.defaultChoice = defaultChoice;
@@ -133,6 +135,12 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
         public String getDefaultChoice()
         {
             return defaultChoice;
+        }
+        
+        @Override
+        public void onEditedValueCreated(String editedValue)
+        {
+            this.editedValue = editedValue;
         }
     }
     
@@ -219,11 +227,12 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
     {
         String name = "PARAM1";
         String description = "Some Text";
-        ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
+        MockChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), null);
         
         // select with editable
         {
             String value = "value3";
+            provider.editedValue = null;
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
                             name,
@@ -234,11 +243,13 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                     value
             );
             assertEquals("select with non-editable", value, envVars.get(name)); 
+            assertNull("onEditedValueCreated must not be called", provider.editedValue);
         }
         
         // select with non-editable
         {
             String value = "value2";
+            provider.editedValue = null;
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
                             name,
@@ -249,11 +260,13 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                     value
             );
             assertEquals("select with non-editable", value, envVars.get(name)); 
+            assertNull("onEditedValueCreated must not be called", provider.editedValue);
         }
         
         // input with editable
         {
             String value = "valueX";
+            provider.editedValue = null;
             EnvVars envVars = runBuildWithSelectParameter(
                     new ExtensibleChoiceParameterDefinition(
                             name,
@@ -264,6 +277,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
                     value
             );
             assertEquals("input with editable", value, envVars.get(name)); 
+            assertEquals("onEditedValueCreated must be called", value, provider.editedValue);
         }
         
         // input with non-editable. causes exception.
@@ -437,7 +451,8 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
     {
         // editable, in choice
         {
-            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            MockChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            provider.editedValue = null;
             ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                     "test",
                     provider,
@@ -457,12 +472,14 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             }
             assertEquals("editable, in choice", Result.SUCCESS, b.getResult());
             assertEquals("editable, in choice", "value2", ceb.getEnvVars().get("test"));
+            assertNull("onEditedValueCreated must not be called", provider.editedValue);
         }
         
         
         // non-editable, in choice
         {
-            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            MockChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value2");
+            provider.editedValue = null;
             ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                     "test",
                     provider,
@@ -482,11 +499,13 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             }
             assertEquals("non-editable, in choice", Result.SUCCESS, b.getResult());
             assertEquals("non-editable, in choice", "value2", ceb.getEnvVars().get("test"));
+            assertNull("onEditedValueCreated must not be called", provider.editedValue);
         }
         
         // editable, not in choice
         {
-            ChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value4");
+            MockChoiceListProvider provider = new MockChoiceListProvider(Arrays.asList("value1", "value2", "value3"), "value4");
+            provider.editedValue = null;
             ExtensibleChoiceParameterDefinition def = new ExtensibleChoiceParameterDefinition(
                     "test",
                     provider,
@@ -506,6 +525,7 @@ public class ExtensibleChoiceParameterDefinitionJenkinsTest extends HudsonTestCa
             }
             assertEquals("editable, not in choice", Result.SUCCESS, b.getResult());
             assertEquals("editable, not in choice", "value4", ceb.getEnvVars().get("test"));
+            assertEquals("onEditedValueCreated must be called", "value4", provider.editedValue);
         }
         
         // non-editable, not in choice

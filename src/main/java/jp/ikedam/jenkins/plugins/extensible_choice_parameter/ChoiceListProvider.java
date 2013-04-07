@@ -63,6 +63,19 @@ abstract public class ChoiceListProvider extends AbstractDescribableImpl<ChoiceL
     }
     
     /**
+     * Called when edit parameter is used.
+     * 
+     * Implementations can override this method, and do custom behavior.
+     * Default implementation do nothing at all.
+     * 
+     * @param editedValue a value input but is not listed in the choice list.
+     */
+    public void onEditedValueCreated(String editedValue)
+    {
+        // Nothing to do.
+    }
+    
+    /**
      * Returns all the ChoiceListProvider subclass whose DescriptorImpl is annotated with Extension.
      * @return DescriptorExtensionList of ChoiceListProvider subclasses.
      */
