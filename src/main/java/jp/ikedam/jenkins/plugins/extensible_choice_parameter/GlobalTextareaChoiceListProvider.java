@@ -242,6 +242,18 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
         return defaultChoice;
     }
     
+    private boolean addEditedValue;
+    
+    /**
+     * Returns whether to add an edited value to choice list.
+     * 
+     * @return whether to add an edited value to choice list
+     */
+    public boolean isAddEditedValue()
+    {
+        return addEditedValue;
+    }
+    
     /**
      * Returns the choices available as a parameter value. 
      * 
@@ -252,6 +264,12 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
     public List<String> getChoiceList()
     {
         return ((DescriptorImpl)getDescriptor()).getChoiceList(getName());
+    }
+    
+    @Override
+    public void onEditedValueCreated(String editedValue)
+    {
+        // TODO: update global choice configuration.
     }
     
     /**
@@ -265,10 +283,11 @@ public class GlobalTextareaChoiceListProvider extends ChoiceListProvider impleme
      * @param defaultChoice the initial selected value.
      */
     @DataBoundConstructor
-    public GlobalTextareaChoiceListProvider(String name, String defaultChoice)
+    public GlobalTextareaChoiceListProvider(String name, String defaultChoice, boolean addEditedValue)
     {
         // No validation is performed, for the name is selected from the dropdown.
         this.name = name;
         this.defaultChoice = (!NoDefaultChoice.equals(defaultChoice))?defaultChoice:null;
+        this.addEditedValue = addEditedValue;
     }
 }
